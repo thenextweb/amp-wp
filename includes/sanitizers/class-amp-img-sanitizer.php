@@ -73,7 +73,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
+			// Added data-src for lazy-loaded imgs.
+			if ( (!$node->hasAttribute( 'src' ) && !$node->hasAttribute( 'data-src' )) || ('' === trim( $node->getAttribute( 'src' ) ) && '' === trim( $node->getAttribute( 'data-src' ) )) ) {
 				$this->remove_invalid_child( $node );
 				continue;
 			}
@@ -131,6 +132,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-layout':
 					$out['layout'] = $value;
+					break;
+
+				/* ADDED FOR LAZY LOADED IMAGES*/
+				case 'data-srcset':
+					$out['srcset'] = $value;
+					break;
+				case 'data-src':
+					$out['src'] = $value;
 					break;
 
 				default:
