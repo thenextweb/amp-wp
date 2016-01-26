@@ -1,0 +1,12 @@
+{
+    "name": "thenextweb/amp-wp",
+    "description": "AMP support for Wordpress plugins (TNW custom)",
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Julio Foulquie",
+            "email": "julio@thenextweb.com"
+        }
+    ],
+    "require": {}
+}
