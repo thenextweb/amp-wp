@@ -90,7 +90,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$urls[] = array(
-				'url' => $url,
+				'url' => tnw_cdn_filter($url),
 				'width' => $width,
 				'height' => $height,
 			);
