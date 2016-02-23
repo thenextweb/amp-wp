@@ -44,7 +44,7 @@ function is_amp_endpoint() {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
-	return false !== get_query_var( AMP_QUERY_VAR, false );
+   	return '1' === get_query_var( AMP_QUERY_VAR, false );
 }
 
 function amp_get_asset_url( $file ) {
