@@ -31,7 +31,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			/*
 			 Added data-original for lazy-loaded imgs. TODO: change for the new theme
 			 */
-			if ( ! array_key_exists( 'src', $old_attributes ) && ! array_key_exists('data-original', $old_attributes)) {
+			if ( ! array_key_exists( 'src', $old_attributes ) && ! array_key_exists('data-src', $old_attributes)) {
 				$node->parentNode->removeChild( $node );
 				continue;
 			}
@@ -85,12 +85,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'src':
 				case 'alt':
 				case 'class':
-				case 'srcset':
 				case 'sizes':
 				case 'on':
 					$out[ $name ] = $value;
 					break;
-
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
