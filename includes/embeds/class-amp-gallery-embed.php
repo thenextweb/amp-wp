@@ -141,6 +141,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$this->did_convert_elements = true;
 
+		$gallery_id = 'gallery-' . md5(json_encode($args));
+
 		$args = wp_parse_args( $args, array(
 			'images' => false,
 		) );
@@ -150,8 +152,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$images = array();
-		foreach ( $args['images'] as $props ) {
-			$image = AMP_HTML_Utils::build_tag(
+		$thumbs = array();
+		foreach ( $args['images'] as $index => $image ) {
+			$images[] = AMP_HTML_Utils::build_tag(
 				'amp-img',
 				array(
 					'src'    => $props['url'],
@@ -172,17 +175,55 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$images[] = $image;
+			$thumbImg = AMP_HTML_Utils::build_tag(
+				'amp-img',
+				array(
+					'src' => $image['url'],
+					'width' => '60',
+					'height' => '40',
+					'layout' => 'responsive'
+				)
+			);
+
+			$thumbs[] = AMP_HTML_Utils::build_tag(
+				'button',
+				array(
+					'on' => 'tap:' . $gallery_id . '.goToSlide(index=' . $index . ')'
+				),
+				$thumbImg
+			);
 		}
 
-		return AMP_HTML_Utils::build_tag(
+		$carousel = AMP_HTML_Utils::build_tag(
 			'amp-carousel',
 			array(
-				'width'  => $this->args['width'],
+				'id' => $gallery_id,
+				'width' => $this->args['width'],
 				'height' => $this->args['height'],
 				'type'   => 'slides',
 				'layout' => 'responsive',
 			),
 			implode( PHP_EOL, $images )
+		);
+
+		$carousel_preview = AMP_HTML_Utils::build_tag(
+			'amp-carousel',
+			array(
+				'class' => 'carousel-preview',
+				'width' => 'auto',
+				'height' => '48',
+				'layout' => 'fixed-height',
+				'type' => 'carousel'
+			),
+			implode( PHP_EOL, $thumbs )
+		);
+
+		return AMP_HTML_Utils::build_tag(
+			'div',
+			array(
+				'class' => 'carousel-wrapper'
+			),
+			$carousel . PHP_EOL . $carousel_preview
 		);
 	}
 }
