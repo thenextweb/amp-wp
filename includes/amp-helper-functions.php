@@ -183,7 +183,16 @@ function is_amp_endpoint() {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
-	return false !== get_query_var( amp_get_slug(), false );
+   	global $wp;
+
+	$url = home_url( $wp->request );
+
+	$end = end(explode('/', rtrim($url, '/')));
+
+	$end = array_slice(explode('/', rtrim($url, '/')), -1)[0];
+
+	return $end ==='amp';
+
 }
 
 /**
