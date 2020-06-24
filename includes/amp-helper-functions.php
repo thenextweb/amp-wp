@@ -48,7 +48,8 @@ function is_amp_endpoint() {
 	
 	$url = home_url( $wp->request );
 	
-	$end = end(explode('/', rtrim($url, '/')));
+	$expl_url = explode('/', rtrim($url, '/'));
+	$end = end($expl_url);
 
 	$end = array_slice(explode('/', rtrim($url, '/')), -1)[0];
 	
