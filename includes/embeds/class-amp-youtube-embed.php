@@ -88,34 +88,55 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	private function get_video_id_from_url( $url ) {
-		$video_id = false;
-		$parsed_url = AMP_WP_Utils::parse_url( $url );
+		$parsed_url = wp_parse_url( $url );
 
-		if ( self::SHORT_URL_HOST === substr( $parsed_url['host'], -strlen( self::SHORT_URL_HOST ) ) ) {
-			// youtu.be/{id}
-			$parts = explode( '/', $parsed_url['path'] );
-			if ( ! empty( $parts ) ) {
-				$video_id = $parts[1];
-			}
-		} else {
-			// ?v={id} or ?list={id}
-			parse_str( $parsed_url['query'], $query_args );
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return false;
+		}
 
-			if ( isset( $query_args['v'] ) ) {
-				$video_id = $this->sanitize_v_arg( $query_args['v'] );
+		$domain = implode( '.', array_slice( explode( '.', $parsed_url['host'] ), -2 ) );
+		if ( ! in_array( $domain, [ 'youtu.be', 'youtube.com', 'youtube-nocookie.com' ], true ) ) {
+			return false;
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			return false;
+		}
+
+		$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
+
+		$query_vars = [];
+		if ( isset( $parsed_url['query'] ) ) {
+			wp_parse_str( $parsed_url['query'], $query_vars );
+
+			// Handle video ID in v query param, e.g. <https://www.youtube.com/watch?v=XOY3ZUO6P0k>.
+			// Support is also included for other query params which don't appear to be supported by YouTube anymore.
+			if ( isset( $query_vars['v'] ) ) {
+				return $query_vars['v'];
+			} elseif ( isset( $query_vars['vi'] ) ) {
+				return $query_vars['vi'];
 			}
 		}
 
-		if ( empty( $video_id ) ) {
-			// /(v|e|embed)/{id}
-			$parts = explode( '/', $parsed_url['path'] );
-
-			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ), true ) ) {
-				$video_id = $parts[2];
-			}
+		if ( empty( $segments[0] ) ) {
+			return false;
 		}
 
-		return $video_id;
+		// For shortened URLs like <http://youtu.be/XOY3ZUO6P0k>, the slug is the first path segment.
+		if ( 'youtu.be' === $parsed_url['host'] ) {
+			return $segments[0];
+		}
+
+		// For non-shortened URLs, the video ID is in the second path segment. For example:
+		// * https://www.youtube.com/watch/XOY3ZUO6P0k
+		// * https://www.youtube.com/embed/XOY3ZUO6P0k
+		// Other top-level segments indicate non-video URLs. There are examples of URLs having segments including
+		// 'v', 'vi', and 'e' but these do not work anymore. In any case, they are added here for completeness.
+		if ( ! empty( $segments[1] ) && in_array( $segments[0], [ 'embed', 'watch', 'v', 'vi', 'e' ], true ) ) {
+			return $segments[1];
+		}
+
+		return false;
 	}
 
 	private function sanitize_v_arg( $value ) {
